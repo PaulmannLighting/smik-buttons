@@ -1,5 +1,5 @@
-use crate::ButtonPressEvent;
-use ringbuffer::{ConstGenericRingBuffer, RingBuffer};
+use crate::EventBuffer;
+use ringbuffer::RingBuffer;
 use std::ops::Range;
 use std::time::Duration;
 
@@ -12,10 +12,10 @@ pub enum SmikEvent {
     LogDump,
 }
 
-impl TryFrom<&ConstGenericRingBuffer<ButtonPressEvent, 5>> for SmikEvent {
+impl TryFrom<&EventBuffer> for SmikEvent {
     type Error = ();
 
-    fn try_from(events: &ConstGenericRingBuffer<ButtonPressEvent, 5>) -> Result<Self, Self::Error> {
+    fn try_from(events: &EventBuffer) -> Result<Self, Self::Error> {
         if events.len() == 5 {
             if let Ok(duration) = events
                 .iter()
@@ -30,15 +30,7 @@ impl TryFrom<&ConstGenericRingBuffer<ButtonPressEvent, 5>> for SmikEvent {
             }
         }
 
-        Err(())
-    }
-}
-
-impl TryFrom<&ButtonPressEvent> for SmikEvent {
-    type Error = ();
-
-    fn try_from(event: &ButtonPressEvent) -> Result<Self, Self::Error> {
-        if let Ok(duration) = event.duration() {
+        if let Some(duration) = events.iter().last().and_then(|event| event.duration().ok()) {
             if LOG_DUMP_SPAN.contains(&duration) {
                 return Ok(Self::LogDump);
             }

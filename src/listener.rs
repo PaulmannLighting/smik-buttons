@@ -1,4 +1,5 @@
 use evdev::{Device, InputEvent};
+use log::{trace, warn};
 use std::sync::{
     atomic::{AtomicBool, Ordering},
     mpsc::{channel, Receiver},
@@ -64,6 +65,10 @@ impl Iterator for Listener {
     type Item = InputEvent;
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.rx.recv().ok()
+        self.rx
+            .recv()
+            .inspect(|event| trace!("{event:?}"))
+            .inspect_err(|error| warn!("{error}"))
+            .ok()
     }
 }

@@ -1,11 +1,12 @@
-use crate::{ButtonPressEvent, InputEventExt, Listener, SmikEvent};
+use crate::{ButtonPressEvent, EventBuffer, InputEventExt, Listener, SmikEvent};
 use evdev::{Device, InputEvent};
-use ringbuffer::{ConstGenericRingBuffer, RingBuffer};
+use log::trace;
+use ringbuffer::RingBuffer;
 
 #[derive(Debug)]
 pub struct SmikEvents {
     listener: Listener,
-    events: ConstGenericRingBuffer<ButtonPressEvent, 5>,
+    events: EventBuffer,
     last_button_down_event: Option<InputEvent>,
     last_button_up_event: Option<InputEvent>,
 }
@@ -16,7 +17,7 @@ impl SmikEvents {
     pub fn new(listener: Listener) -> Self {
         Self {
             listener,
-            events: ConstGenericRingBuffer::new(),
+            events: EventBuffer::new(),
             last_button_down_event: None,
             last_button_up_event: None,
         }
@@ -40,25 +41,17 @@ impl Iterator for SmikEvents {
                 .take()
                 .and_then(|down| ButtonPressEvent::try_new(down, up))
         }) {
+            trace!("Button press event: {event:?}");
             self.events.push(event);
         }
 
         if let Ok(event) = SmikEvent::try_from(&self.events) {
             self.events.clear();
-            return Some(Some(event));
+            trace!("Smik event: {event:?}");
+            Some(Some(event))
+        } else {
+            Some(None)
         }
-
-        if let Some(event) = self
-            .events
-            .iter()
-            .last()
-            .and_then(|event| SmikEvent::try_from(event).ok())
-        {
-            self.events.clear();
-            return Some(Some(event));
-        }
-
-        Some(None)
     }
 }
 
