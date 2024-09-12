@@ -7,12 +7,12 @@ const LOG_DUMP_SPAN: Range<Duration> = Duration::from_secs(5)..Duration::from_se
 const RESET_TIMEFRAME: Duration = Duration::from_secs(10);
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
-pub enum SmikEvent {
+pub enum Event {
     Reset,
     LogDump,
 }
 
-impl TryFrom<&EventBuffer> for SmikEvent {
+impl TryFrom<&EventBuffer> for Event {
     type Error = ();
 
     fn try_from(events: &EventBuffer) -> Result<Self, Self::Error> {

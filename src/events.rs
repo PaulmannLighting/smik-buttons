@@ -1,17 +1,17 @@
-use crate::{ButtonPressEvent, EventBuffer, InputEventExt, Listener, SmikEvent};
+use crate::{ButtonPressEvent, Event, EventBuffer, InputEventExt, Listener};
 use evdev::{Device, InputEvent};
 use log::trace;
 use ringbuffer::RingBuffer;
 
 #[derive(Debug)]
-pub struct SmikEvents {
+pub struct Events {
     listener: Listener,
     events: EventBuffer,
     last_button_down_event: Option<InputEvent>,
     last_button_up_event: Option<InputEvent>,
 }
 
-impl SmikEvents {
+impl Events {
     /// Listen for input events from a device.
     #[must_use]
     pub fn new(listener: Listener) -> Self {
@@ -24,8 +24,8 @@ impl SmikEvents {
     }
 }
 
-impl Iterator for SmikEvents {
-    type Item = Option<SmikEvent>;
+impl Iterator for Events {
+    type Item = Option<Event>;
 
     fn next(&mut self) -> Option<Self::Item> {
         let event = self.listener.next()?;
@@ -45,7 +45,7 @@ impl Iterator for SmikEvents {
             self.events.push(event);
         }
 
-        if let Ok(event) = SmikEvent::try_from(&self.events) {
+        if let Ok(event) = Event::try_from(&self.events) {
             self.events.clear();
             trace!("Smik event: {event:?}");
             Some(Some(event))
@@ -55,7 +55,7 @@ impl Iterator for SmikEvents {
     }
 }
 
-impl From<Device> for SmikEvents {
+impl From<Device> for Events {
     fn from(device: Device) -> Self {
         Self::new(Listener::spawn(device))
     }
