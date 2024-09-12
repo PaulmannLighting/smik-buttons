@@ -1,7 +1,9 @@
 use evdev::{Device, InputEvent};
-use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::mpsc::{channel, Receiver};
-use std::sync::Arc;
+use std::sync::{
+    atomic::{AtomicBool, Ordering},
+    mpsc::{channel, Receiver},
+    Arc,
+};
 use std::thread::spawn;
 
 /// Listen for input events from a device.
