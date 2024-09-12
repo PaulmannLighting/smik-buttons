@@ -27,9 +27,7 @@ impl Iterator for Events {
 
     fn next(&mut self) -> Option<Self::Item> {
         loop {
-            let event = self.listener.next()?;
-
-            let Ok(press) = event.try_into() else {
+            let Ok(press) = self.listener.next()?.try_into() else {
                 continue;
             };
 
@@ -43,7 +41,7 @@ impl Iterator for Events {
                         .take()
                         .and_then(|down| Cycle::try_new(down, Press::Up(timestamp)))
                     {
-                        trace!("Button press event: {event:?}");
+                        trace!("Button press event: {cycle:?}");
                         self.events.push(cycle);
                     }
                 }
