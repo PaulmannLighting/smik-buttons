@@ -16,26 +16,43 @@ impl TryFrom<&EventBuffer> for Event {
     type Error = ();
 
     fn try_from(events: &EventBuffer) -> Result<Self, Self::Error> {
-        if events.is_full() {
-            if let Ok(duration) = events
-                .iter()
-                .last()
-                .ok_or(())?
-                .end()
-                .duration_since(events.iter().next().ok_or(())?.start())
-            {
-                if duration < RESET_TIMEFRAME {
-                    return Ok(Self::Reset);
-                }
-            }
-        }
-
-        if let Some(duration) = events.iter().last().and_then(|event| event.duration().ok()) {
-            if LOG_DUMP_SPAN.contains(&duration) {
-                return Ok(Self::LogDump);
-            }
+        if events.is_reset_event() {
+            return Ok(Self::Reset);
+        } else if events.is_log_dump_event() {
+            return Ok(Self::LogDump);
         }
 
         Err(())
+    }
+}
+
+trait EventBufferExt {
+    fn is_reset_event(&self) -> bool;
+    fn is_log_dump_event(&self) -> bool;
+}
+
+impl EventBufferExt for EventBuffer {
+    fn is_reset_event(&self) -> bool {
+        if !self.is_full() {
+            return false;
+        }
+
+        if let Some(duration) = self.iter().last().and_then(|last| {
+            self.iter()
+                .next()
+                .and_then(|first| last.end().duration_since(first.start()).ok())
+        }) {
+            return duration < RESET_TIMEFRAME;
+        }
+
+        false
+    }
+
+    fn is_log_dump_event(&self) -> bool {
+        if let Some(duration) = self.iter().last().and_then(|event| event.duration().ok()) {
+            return LOG_DUMP_SPAN.contains(&duration);
+        }
+
+        false
     }
 }
