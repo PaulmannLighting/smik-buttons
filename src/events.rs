@@ -25,32 +25,32 @@ impl Events {
 }
 
 impl Iterator for Events {
-    type Item = Option<Event>;
+    type Item = Event;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let event = self.listener.next()?;
+        loop {
+            let event = self.listener.next()?;
 
-        if event.is_button_down() {
-            self.last_button_down_event.replace(event);
-        } else if event.is_button_up() {
-            self.last_button_up_event.replace(event);
-        }
+            if event.is_button_down() {
+                self.last_button_down_event.replace(event);
+            } else if event.is_button_up() {
+                self.last_button_up_event.replace(event);
+            }
 
-        if let Some(event) = self.last_button_up_event.take().and_then(|up| {
-            self.last_button_down_event
-                .take()
-                .and_then(|down| ButtonPressEvent::try_new(down, up))
-        }) {
-            trace!("Button press event: {event:?}");
-            self.events.push(event);
-        }
+            if let Some(event) = self.last_button_up_event.take().and_then(|up| {
+                self.last_button_down_event
+                    .take()
+                    .and_then(|down| ButtonPressEvent::try_new(down, up))
+            }) {
+                trace!("Button press event: {event:?}");
+                self.events.push(event);
+            }
 
-        if let Ok(event) = Event::try_from(&self.events) {
-            self.events.clear();
-            trace!("Smik event: {event:?}");
-            Some(Some(event))
-        } else {
-            Some(None)
+            if let Ok(event) = Event::try_from(&self.events) {
+                self.events.clear();
+                trace!("Smik event: {event:?}");
+                return Some(event);
+            }
         }
     }
 }
