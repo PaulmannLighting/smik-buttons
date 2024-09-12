@@ -16,7 +16,7 @@ impl TryFrom<&EventBuffer> for Event {
     type Error = ();
 
     fn try_from(events: &EventBuffer) -> Result<Self, Self::Error> {
-        if events.len() == 5 {
+        if events.is_full() {
             if let Ok(duration) = events
                 .iter()
                 .last()
