@@ -1,5 +1,4 @@
 use evdev::{Device, InputEvent};
-use std::sync::mpsc::Sender;
 use std::sync::{
     atomic::{AtomicBool, Ordering},
     mpsc::{channel, Receiver},
@@ -11,6 +10,7 @@ use std::thread::{spawn, JoinHandle};
 pub struct Listener {
     running: Arc<AtomicBool>,
     thread: Option<JoinHandle<()>>,
+    rx: Receiver<InputEvent>,
 }
 
 impl Listener {
@@ -19,12 +19,9 @@ impl Listener {
     /// # Panics
     /// This function may panic if it fails to send an event.
     #[must_use]
-    pub fn spawn(device: Device) -> (Self, Receiver<InputEvent>) {
+    pub fn spawn(mut device: Device) -> Self {
+        let running = Arc::new(AtomicBool::new(true));
         let (tx, rx) = channel();
-        (Self::new(Arc::new(AtomicBool::new(true)), device, tx), rx)
-    }
-
-    fn new(running: Arc<AtomicBool>, mut device: Device, tx: Sender<InputEvent>) -> Self {
         Self {
             running: running.clone(),
             thread: Some(spawn(move || {
@@ -36,6 +33,7 @@ impl Listener {
                     }
                 }
             })),
+            rx,
         }
     }
 }
@@ -47,5 +45,13 @@ impl Drop for Listener {
         if let Some(thread) = self.thread.take() {
             thread.join().expect("Failed to join listener thread");
         }
+    }
+}
+
+impl Iterator for Listener {
+    type Item = InputEvent;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.rx.recv().ok()
     }
 }
