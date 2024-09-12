@@ -8,6 +8,6 @@ description = "Detect button events of the smik board."
 repository = "https://github.com/paulmannlighting/smik-butons"
 
 [dependencies]
-evdev = "0.12.2"
-log = "0.4.22"
-ringbuffer = "0.15.0"
+evdev = "0.12"
+log = "0.4"
+ringbuffer = "0.15"
