@@ -8,7 +8,6 @@ pub struct Events {
     listener: Listener,
     events: EventBuffer,
     last_button_down_event: Option<InputEvent>,
-    last_button_up_event: Option<InputEvent>,
 }
 
 impl Events {
@@ -19,7 +18,6 @@ impl Events {
             listener,
             events: EventBuffer::new(),
             last_button_down_event: None,
-            last_button_up_event: None,
         }
     }
 }
@@ -34,16 +32,14 @@ impl Iterator for Events {
             if event.is_button_down() {
                 self.last_button_down_event.replace(event);
             } else if event.is_button_up() {
-                self.last_button_up_event.replace(event);
-            }
-
-            if let Some(event) = self.last_button_up_event.take().and_then(|up| {
-                self.last_button_down_event
+                if let Some(event) = self
+                    .last_button_down_event
                     .take()
-                    .and_then(|down| ButtonPressEvent::try_new(down, up))
-            }) {
-                trace!("Button press event: {event:?}");
-                self.events.push(event);
+                    .and_then(|down| ButtonPressEvent::try_new(down, event))
+                {
+                    trace!("Button press event: {event:?}");
+                    self.events.push(event);
+                }
             }
 
             if let Ok(event) = Event::try_from(&self.events) {
