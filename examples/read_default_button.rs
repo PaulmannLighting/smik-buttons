@@ -7,6 +7,8 @@ fn main() {
         .listen()
         .expect("Failed to listen to button events")
     {
-        println!("{event:?}");
+        if let Some(event) = event {
+            println!("{event:?}");
+        }
     }
 }
