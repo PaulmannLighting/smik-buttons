@@ -1,5 +1,5 @@
-use crate::{ButtonPressEvent, Event, EventBuffer, InputEventExt, Listener};
-use evdev::{Device, InputEvent};
+use crate::{Cycle, Event, EventBuffer, Listener, Press};
+use evdev::Device;
 use log::trace;
 use ringbuffer::RingBuffer;
 
@@ -7,7 +7,7 @@ use ringbuffer::RingBuffer;
 pub struct Events {
     listener: Listener,
     events: EventBuffer,
-    last_button_down_event: Option<InputEvent>,
+    last_button_down_event: Option<Press>,
 }
 
 impl Events {
@@ -29,16 +29,23 @@ impl Iterator for Events {
         loop {
             let event = self.listener.next()?;
 
-            if event.is_button_down() {
-                self.last_button_down_event.replace(event);
-            } else if event.is_button_up() {
-                if let Some(event) = self
-                    .last_button_down_event
-                    .take()
-                    .and_then(|down| ButtonPressEvent::try_new(down, event))
-                {
-                    trace!("Button press event: {event:?}");
-                    self.events.push(event);
+            let Ok(press) = event.try_into() else {
+                continue;
+            };
+
+            match press {
+                Press::Down(timestamp) => {
+                    self.last_button_down_event.replace(Press::Down(timestamp));
+                }
+                Press::Up(timestamp) => {
+                    if let Some(cycle) = self
+                        .last_button_down_event
+                        .take()
+                        .and_then(|down| Cycle::try_new(down, Press::Up(timestamp)))
+                    {
+                        trace!("Button press event: {event:?}");
+                        self.events.push(cycle);
+                    }
                 }
             }
 
