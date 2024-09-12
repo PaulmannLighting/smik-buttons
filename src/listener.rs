@@ -37,18 +37,6 @@ impl Listener {
             rx,
         }
     }
-
-    /// Stop listening for input events.
-    ///
-    /// # Panics
-    /// This function may panic if it fails to join the listener thread.
-    pub fn stop(mut self) {
-        self.running.store(false, Ordering::Relaxed);
-
-        if let Some(thread) = self.thread.take() {
-            thread.join().expect("Failed to join listener thread");
-        }
-    }
 }
 
 impl Drop for Listener {
