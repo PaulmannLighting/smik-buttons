@@ -47,10 +47,7 @@ impl Cycle {
         if let Press::Down(down_time) = down {
             if let Press::Up(up_time) = up {
                 if down_time < up_time {
-                    Ok(Self {
-                        down: Press::Down(down_time),
-                        up: Press::Up(up_time),
-                    })
+                    Ok(Self { down, up })
                 } else {
                     Err(TryNewError::DownNotBeforeUp(down, up))
                 }

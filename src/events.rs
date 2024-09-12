@@ -32,14 +32,14 @@ impl Iterator for Events {
             };
 
             match press {
-                Press::Down(timestamp) => {
-                    self.last_button_down_event.replace(Press::Down(timestamp));
+                Press::Down(_) => {
+                    self.last_button_down_event.replace(press);
                 }
-                Press::Up(timestamp) => {
+                Press::Up(_) => {
                     if let Some(cycle) = self
                         .last_button_down_event
                         .take()
-                        .and_then(|down| Cycle::try_new(down, Press::Up(timestamp)).ok())
+                        .and_then(|down| Cycle::try_new(down, press).ok())
                     {
                         trace!("Button press event: {cycle:?}");
                         self.events.push(cycle);
