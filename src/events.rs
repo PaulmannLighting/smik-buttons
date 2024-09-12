@@ -39,7 +39,7 @@ impl Iterator for Events {
                     if let Some(cycle) = self
                         .last_button_down_event
                         .take()
-                        .and_then(|down| Cycle::try_new(down, Press::Up(timestamp)))
+                        .and_then(|down| Cycle::try_new(down, Press::Up(timestamp)).ok())
                     {
                         trace!("Button press event: {cycle:?}");
                         self.events.push(cycle);

@@ -13,16 +13,16 @@ pub enum Event {
 }
 
 impl TryFrom<&EventBuffer> for Event {
-    type Error = ();
+    type Error = TryFromEventBufferError;
 
     fn try_from(events: &EventBuffer) -> Result<Self, Self::Error> {
         if events.is_reset_event() {
-            return Ok(Self::Reset);
+            Ok(Self::Reset)
         } else if events.is_log_dump_event() {
-            return Ok(Self::LogDump);
+            Ok(Self::LogDump)
+        } else {
+            Err(TryFromEventBufferError::NotASmikEvent)
         }
-
-        Err(())
     }
 }
 
@@ -55,4 +55,9 @@ impl EventBufferExt for EventBuffer {
 
         false
     }
+}
+
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+pub enum TryFromEventBufferError {
+    NotASmikEvent,
 }

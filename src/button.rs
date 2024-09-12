@@ -17,17 +17,17 @@ impl Press {
 }
 
 impl TryFrom<InputEvent> for Press {
-    type Error = ();
+    type Error = TryFromInputEventError;
 
     fn try_from(event: InputEvent) -> Result<Self, Self::Error> {
         if !matches!(event.kind(), InputEventKind::Key(_)) {
-            return Err(());
+            return Err(TryFromInputEventError::NotAButtonEvent(event));
         }
 
         match event.value() {
             1 => Ok(Self::Down(event.timestamp())),
             0 => Ok(Self::Up(event.timestamp())),
-            _ => Err(()),
+            _ => Err(TryFromInputEventError::InvalidEventType(event)),
         }
     }
 }
@@ -40,19 +40,26 @@ pub struct Cycle {
 
 impl Cycle {
     /// Create a new button press event.
-    #[must_use]
-    pub fn try_new(down: Press, up: Press) -> Option<Self> {
-        if let Press::Down(down) = down {
-            if let Press::Up(up) = up {
-                if down < up {
-                    return Some(Self {
-                        down: Press::Down(down),
-                        up: Press::Up(up),
-                    });
+    ///
+    /// # Errors
+    /// This function may return an error if the button press events are invalid.
+    pub fn try_new(down: Press, up: Press) -> Result<Self, TryNewError> {
+        if let Press::Down(down_time) = down {
+            if let Press::Up(up_time) = up {
+                if down_time < up_time {
+                    Ok(Self {
+                        down: Press::Down(down_time),
+                        up: Press::Up(up_time),
+                    })
+                } else {
+                    Err(TryNewError::DownNotBeforeUp(down, up))
                 }
+            } else {
+                Err(TryNewError::NotAnUpEvent(up))
             }
+        } else {
+            Err(TryNewError::NotADownEvent(down))
         }
-        None
     }
 
     #[must_use]
@@ -72,4 +79,17 @@ impl Cycle {
     pub fn duration(&self) -> Result<Duration, SystemTimeError> {
         self.up.timestamp().duration_since(self.down.timestamp())
     }
+}
+
+#[derive(Clone, Copy, Debug)]
+pub enum TryFromInputEventError {
+    NotAButtonEvent(InputEvent),
+    InvalidEventType(InputEvent),
+}
+
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+pub enum TryNewError {
+    NotADownEvent(Press),
+    NotAnUpEvent(Press),
+    DownNotBeforeUp(Press, Press),
 }
