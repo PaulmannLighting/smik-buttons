@@ -2,6 +2,10 @@
 name = "smik-buttons"
 version = "0.1.0"
 edition = "2021"
+license = "MIT"
+authors = ["Richard Neumann <neumann@paulmann.de>"]
+description = "Detect button events of the smik board."
+repository = "https://github.com/paulmannlighting/smik-butons"
 
 [dependencies]
 evdev = "0.12.2"
