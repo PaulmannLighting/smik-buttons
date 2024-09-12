@@ -6,8 +6,7 @@ const BUTTON: &str = "/dev/input/by-path/platform-gpio-keys-event";
 
 #[derive(Debug, Parser)]
 struct Args {
-    /// Path to the button device.
-    #[clap(long, default_value = BUTTON)]
+    #[clap(default_value = BUTTON)]
     button: String,
 }
 
