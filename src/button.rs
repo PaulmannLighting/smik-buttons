@@ -38,11 +38,14 @@ impl Listener {
 }
 
 impl Iterator for Listener {
-    type Item = Event;
+    type Item = Option<Event>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.file.read_exact(&mut self.buffer).ok()?;
-        Some(Event::Raw(self.buffer.into()))
+        if matches!(self.file.read_exact(&mut self.buffer), Ok(())) {
+            Some(Some(Event::Raw(self.buffer.into())))
+        } else {
+            Some(None)
+        }
     }
 }
 
