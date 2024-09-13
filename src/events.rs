@@ -58,6 +58,6 @@ impl Iterator for Events {
 
 impl From<Device> for Events {
     fn from(device: Device) -> Self {
-        Self::new(Listener::spawn(device))
+        Self::new(Listener::new(device))
     }
 }
