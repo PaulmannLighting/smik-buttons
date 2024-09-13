@@ -1,11 +1,11 @@
 mod action;
+mod actions;
 mod button;
-mod events;
 mod listener;
 
 pub use action::{Action, TryFromEventBufferError};
+pub use actions::Actions;
 use button::Cycle;
-pub use events::Events;
 use ringbuffer::ConstGenericRingBuffer;
 
 const MAX_EVENTS: usize = 5;

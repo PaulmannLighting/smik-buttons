@@ -6,13 +6,13 @@ use log::trace;
 use ringbuffer::RingBuffer;
 
 #[derive(Debug)]
-pub struct Events {
+pub struct Actions {
     listener: Listener,
     cycles: CycleBuffer,
     last_press: Option<Press>,
 }
 
-impl Events {
+impl Actions {
     /// Listen for input events from a device.
     #[must_use]
     pub fn new(listener: Listener) -> Self {
@@ -24,7 +24,7 @@ impl Events {
     }
 }
 
-impl Iterator for Events {
+impl Iterator for Actions {
     type Item = Action;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -58,7 +58,7 @@ impl Iterator for Events {
     }
 }
 
-impl From<Device> for Events {
+impl From<Device> for Actions {
     fn from(device: Device) -> Self {
         Self::new(Listener::new(device))
     }
