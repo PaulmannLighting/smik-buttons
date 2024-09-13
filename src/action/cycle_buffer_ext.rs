@@ -6,12 +6,12 @@ use std::time::Duration;
 const LOG_DUMP_SPAN: Range<Duration> = Duration::from_secs(5)..Duration::from_secs(20);
 const RESET_TIMEFRAME: Duration = Duration::from_secs(10);
 
-pub trait EventBufferExt {
+pub trait CycleBufferExt {
     fn is_reset_event(&self) -> bool;
     fn is_log_dump_event(&self) -> bool;
 }
 
-impl EventBufferExt for CycleBuffer {
+impl CycleBufferExt for CycleBuffer {
     fn is_reset_event(&self) -> bool {
         if !self.is_full() {
             return false;

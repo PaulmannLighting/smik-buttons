@@ -1,9 +1,9 @@
+mod cycle_buffer_ext;
 mod errors;
-mod event_buffer_ext;
 
 use crate::CycleBuffer;
+use cycle_buffer_ext::CycleBufferExt;
 pub use errors::TryFromEventBufferError;
-use event_buffer_ext::EventBufferExt;
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum Action {
