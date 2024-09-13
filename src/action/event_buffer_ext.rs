@@ -1,4 +1,4 @@
-use crate::EventBuffer;
+use crate::CycleBuffer;
 use ringbuffer::RingBuffer;
 use std::ops::Range;
 use std::time::Duration;
@@ -6,32 +6,12 @@ use std::time::Duration;
 const LOG_DUMP_SPAN: Range<Duration> = Duration::from_secs(5)..Duration::from_secs(20);
 const RESET_TIMEFRAME: Duration = Duration::from_secs(10);
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
-pub enum Event {
-    Reset,
-    LogDump,
-}
-
-impl TryFrom<&EventBuffer> for Event {
-    type Error = TryFromEventBufferError;
-
-    fn try_from(events: &EventBuffer) -> Result<Self, Self::Error> {
-        if events.is_reset_event() {
-            Ok(Self::Reset)
-        } else if events.is_log_dump_event() {
-            Ok(Self::LogDump)
-        } else {
-            Err(TryFromEventBufferError::NotASmikEvent)
-        }
-    }
-}
-
-trait EventBufferExt {
+pub trait EventBufferExt {
     fn is_reset_event(&self) -> bool;
     fn is_log_dump_event(&self) -> bool;
 }
 
-impl EventBufferExt for EventBuffer {
+impl EventBufferExt for CycleBuffer {
     fn is_reset_event(&self) -> bool {
         if !self.is_full() {
             return false;
@@ -55,9 +35,4 @@ impl EventBufferExt for EventBuffer {
 
         false
     }
-}
-
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
-pub enum TryFromEventBufferError {
-    NotASmikEvent,
 }

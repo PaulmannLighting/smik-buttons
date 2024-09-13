@@ -1,4 +1,6 @@
-use crate::{Cycle, Event, EventBuffer, Listener, Press};
+use crate::button::{Cycle, Event, Press};
+use crate::listener::Listener;
+use crate::{Action, CycleBuffer};
 use evdev::Device;
 use log::trace;
 use ringbuffer::RingBuffer;
@@ -6,8 +8,8 @@ use ringbuffer::RingBuffer;
 #[derive(Debug)]
 pub struct Events {
     listener: Listener,
-    events: EventBuffer,
-    last_button_down_event: Option<Press>,
+    cycles: CycleBuffer,
+    last_press: Option<Press>,
 }
 
 impl Events {
@@ -16,39 +18,39 @@ impl Events {
     pub fn new(listener: Listener) -> Self {
         Self {
             listener,
-            events: EventBuffer::new(),
-            last_button_down_event: None,
+            cycles: CycleBuffer::new(),
+            last_press: None,
         }
     }
 }
 
 impl Iterator for Events {
-    type Item = Event;
+    type Item = Action;
 
     fn next(&mut self) -> Option<Self::Item> {
         loop {
-            let Ok(press) = self.listener.next()?.try_into() else {
+            let Ok(cycle) = self.listener.next()?.try_into() else {
                 continue;
             };
 
-            match press {
-                Press::Down(_) => {
-                    self.last_button_down_event.replace(press);
+            match cycle {
+                Event::Press(press) => {
+                    self.last_press.replace(press);
                 }
-                Press::Up(_) => {
+                Event::Release(release) => {
                     if let Some(cycle) = self
-                        .last_button_down_event
+                        .last_press
                         .take()
-                        .and_then(|down| Cycle::try_new(down, press).ok())
+                        .and_then(|press| Cycle::try_new(press, release).ok())
                     {
-                        trace!("Button press event: {cycle:?}");
-                        self.events.push(cycle);
+                        trace!("Button cycle: {cycle:?}");
+                        self.cycles.push(cycle);
                     }
                 }
             }
 
-            if let Ok(event) = Event::try_from(&self.events) {
-                self.events.clear();
+            if let Ok(event) = Action::try_from(&self.cycles) {
+                self.cycles.clear();
                 trace!("Smik event: {event:?}");
                 return Some(event);
             }
