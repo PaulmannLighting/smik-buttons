@@ -14,7 +14,7 @@ fn main() {
     env_logger::init();
     let args = Args::parse();
 
-    for event in Actions::from(Device::open(args.button).expect("Failed to open button device")) {
-        println!("Read event: {event:?}");
+    for action in Actions::from(Device::open(args.button).expect("Failed to open button device")) {
+        println!("Read event: {action:?}");
     }
 }
