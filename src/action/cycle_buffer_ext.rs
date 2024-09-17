@@ -17,22 +17,20 @@ impl CycleBufferExt for CycleBuffer {
             return false;
         }
 
-        if let Some(duration) = self.iter().last().and_then(|last| {
-            self.iter()
-                .next()
-                .and_then(|first| last.end().duration_since(first.start()).ok())
-        }) {
-            return duration < RESET_TIMEFRAME;
-        }
-
-        false
+        self.iter()
+            .last()
+            .and_then(|last| {
+                self.iter()
+                    .next()
+                    .and_then(|first| last.end().duration_since(first.start()).ok())
+            })
+            .map_or(false, |duration| duration < RESET_TIMEFRAME)
     }
 
     fn is_log_dump_event(&self) -> bool {
-        if let Some(duration) = self.iter().last().and_then(|event| event.duration().ok()) {
-            return LOG_DUMP_SPAN.contains(&duration);
-        }
-
-        false
+        self.iter()
+            .last()
+            .and_then(|event| event.duration().ok())
+            .map_or(false, |duration| LOG_DUMP_SPAN.contains(&duration))
     }
 }
