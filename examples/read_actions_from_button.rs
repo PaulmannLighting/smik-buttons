@@ -1,3 +1,4 @@
+//! Read and print actions from the smik gateway's button.
 use clap::Parser;
 use evdev::Device;
 use smik_buttons::Actions;
