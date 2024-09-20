@@ -5,6 +5,7 @@ use evdev::Device;
 use log::trace;
 use ringbuffer::RingBuffer;
 
+/// An iterator that yields actions from the smik gateway's button.
 #[derive(Debug)]
 pub struct Actions {
     listener: Listener,

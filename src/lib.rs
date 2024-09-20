@@ -1,3 +1,4 @@
+//! Handle events from pressing the smik gateway's button.
 mod action;
 mod actions;
 mod button;

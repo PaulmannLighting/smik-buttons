@@ -6,8 +6,11 @@ use cycle_buffer_ext::CycleBufferExt;
 pub use errors::TryFromEventBufferError;
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
+/// An action that can be performed by pressing the smik device's button.
 pub enum Action {
+    /// Reset the smik gateway.
     Reset,
+    /// Send a dump of the log files to the cloud.
     LogDump,
 }
 
