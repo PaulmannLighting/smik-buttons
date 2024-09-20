@@ -4,7 +4,7 @@ mod actions;
 mod button;
 mod listener;
 
-pub use action::{Action, TryFromEventBufferError};
+pub use action::Action;
 pub use actions::Actions;
 use button::Cycle;
 use ringbuffer::ConstGenericRingBuffer;

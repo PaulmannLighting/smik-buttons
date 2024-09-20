@@ -1,4 +1,4 @@
-use super::{Press, Release, TryNewError};
+use super::{Press, Release};
 use std::time::{Duration, SystemTime, SystemTimeError};
 
 /// A button cycle consisting of a press and a release event.
@@ -13,11 +13,11 @@ impl Cycle {
     ///
     /// # Errors
     /// This function may return an error if the button press events are invalid.
-    pub fn try_new(press: Press, release: Release) -> Result<Self, TryNewError> {
+    pub fn try_new(press: Press, release: Release) -> Option<Self> {
         if press.0 < release.0 {
-            Ok(Self { press, release })
+            Some(Self { press, release })
         } else {
-            Err(TryNewError::PressNotBeforeRelease)
+            None
         }
     }
 

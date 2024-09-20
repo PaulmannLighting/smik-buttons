@@ -42,7 +42,7 @@ impl Iterator for Actions {
                     if let Some(cycle) = self
                         .last_press
                         .take()
-                        .and_then(|press| Cycle::try_new(press, release).ok())
+                        .and_then(|press| Cycle::try_new(press, release))
                     {
                         trace!("Button cycle: {cycle:?}");
                         self.cycles.push(cycle);

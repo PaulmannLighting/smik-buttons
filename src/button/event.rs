@@ -1,4 +1,5 @@
-use super::{Press, Release, TryFromInputEventError};
+use super::{Press, Release};
+pub use error::TryFromInputEventError;
 use evdev::{InputEvent, InputEventKind};
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
@@ -21,4 +22,27 @@ impl TryFrom<InputEvent> for Event {
             _ => Err(TryFromInputEventError::InvalidEvent),
         }
     }
+}
+
+mod error {
+    use std::error::Error;
+    use std::fmt::Display;
+
+    #[allow(clippy::module_name_repetitions)]
+    #[derive(Clone, Copy, Debug)]
+    pub enum TryFromInputEventError {
+        InvalidEvent,
+        NotAButtonEvent,
+    }
+
+    impl Display for TryFromInputEventError {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            match self {
+                Self::InvalidEvent => write!(f, "invalid event"),
+                Self::NotAButtonEvent => write!(f, "not a button event"),
+            }
+        }
+    }
+
+    impl Error for TryFromInputEventError {}
 }

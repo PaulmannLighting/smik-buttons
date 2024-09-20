@@ -1,9 +1,7 @@
 mod cycle_buffer_ext;
-mod errors;
 
 use crate::CycleBuffer;
 use cycle_buffer_ext::CycleBufferExt;
-pub use errors::TryFromEventBufferError;
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 /// An action that can be performed by pressing the smik device's button.
@@ -15,7 +13,7 @@ pub enum Action {
 }
 
 impl TryFrom<&CycleBuffer> for Action {
-    type Error = TryFromEventBufferError;
+    type Error = ();
 
     fn try_from(events: &CycleBuffer) -> Result<Self, Self::Error> {
         if events.is_reset_event() {
@@ -23,7 +21,7 @@ impl TryFrom<&CycleBuffer> for Action {
         } else if events.is_log_dump_event() {
             Ok(Self::LogDump)
         } else {
-            Err(TryFromEventBufferError::NotASmikEvent)
+            Err(())
         }
     }
 }
