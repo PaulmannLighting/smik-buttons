@@ -16,7 +16,7 @@ pub struct Actions {
 impl Actions {
     /// Listen for input events from a device.
     #[must_use]
-    pub fn new(listener: Listener) -> Self {
+    pub const fn new(listener: Listener) -> Self {
         Self {
             listener,
             cycles: CycleBuffer::new(),
