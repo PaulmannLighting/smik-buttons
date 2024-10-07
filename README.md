@@ -18,3 +18,7 @@ pressed within certain constraints:
 ## Examples
 
 The folder `examples` contains a few examples on how to use the library.
+
+## Supported platforms
+
+This library uses `evdev` and only runs on Linux.
