@@ -1,14 +1,16 @@
 //! Read and print actions from the smik gateway's button.
+
 use clap::Parser;
 use evdev::Device;
 use smik_buttons::Actions;
+use std::path::PathBuf;
 
 const BUTTON: &str = "/dev/input/by-path/platform-gpio-keys-event";
 
 #[derive(Debug, Parser)]
 struct Args {
     #[clap(default_value = BUTTON)]
-    button: String,
+    button: PathBuf,
 }
 
 fn main() {
